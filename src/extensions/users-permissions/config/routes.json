@@ -1,0 +1,19 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/users/me/books",
+      "handler": "User.getUserBooks",
+      "config": {
+        "policies": [],
+        "prefix": "",
+        "description": "description",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User",
+          "actionType": "find"
+        }
+      }
+    }
+  ]
+}
