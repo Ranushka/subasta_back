@@ -14,13 +14,11 @@ module.exports = createCoreController("api::bid.bid", ({ strapi }) => ({
     const { value, product } = ctx.request.body.data;
     const currentBidPrice = parseInt(value);
 
-    ctx.request.body.data.account = user_id;
+    const account = await strapi.db.query("api::account.account").findOne({
+      where: { user: user_id },
+    });
 
-    const { id: accountId, balance: account_balance } = await strapi.db
-      .query("api::account.account")
-      .findOne({
-        where: { user: user_id },
-      });
+    ctx.request.body.data.account = account.id;
 
     const lastBid = await strapi.db.query("api::bid.bid").findOne({
       orderBy: { createdAt: "desc" },
@@ -35,10 +33,10 @@ module.exports = createCoreController("api::bid.bid", ({ strapi }) => ({
 
     const updatedAccount = await strapi.entityService.update(
       "api::account.account",
-      accountId,
+      account.id,
       {
         data: {
-          balance: account_balance - 1,
+          balance: account.balance - 1,
         },
       }
     );
@@ -53,7 +51,7 @@ module.exports = createCoreController("api::bid.bid", ({ strapi }) => ({
 
     return {
       ...response,
-      balance: updatedAccount.balance,
+      balance: updatedAccount?.balance,
     };
   },
 }));

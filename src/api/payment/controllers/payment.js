@@ -40,28 +40,35 @@ module.exports = createCoreController("api::payment.payment", ({ strapi }) => ({
     const user = ctx.state.user;
     const user_id = user.id;
 
-    ctx.request.body.data.account = user_id;
+    console.log("dataFromUser", user_id, dataFromUser.planId);
 
-    console.log("dataFromUser", user_id, dataFromUser);
+    const userAccount = await strapi.db.query("api::account.account").findOne({
+      where: { user: user_id },
+    });
 
-    const { id: accountId, balance: account_balance } = await strapi.db
-      .query("api::account.account")
-      .findOne({
-        where: { user: user_id },
-      });
+    const selectedPlan = tokenPackages.find(
+      (a) => a.id === `${dataFromUser.planId}`
+    );
+    const balanceToUpdate =
+      parseInt(selectedPlan.tokens) + parseInt(userAccount.balance);
 
-    const plan = tokenPackages.find((a) => a.id === dataFromUser.planId);
-    const balanceToUpdate = parseInt(plan.tokens) + parseInt(account_balance);
+    // console.log(
+    //   "selectedPlan.tokens-->",
+    //   userAccount.balance,
+    //   selectedPlan.tokens
+    // );
 
     const updatedAccount = await strapi.entityService.update(
       "api::account.account",
-      accountId,
+      userAccount.id,
       {
         data: {
           balance: balanceToUpdate,
         },
       }
     );
+
+    ctx.request.body.data.account = userAccount.id;
 
     const response = await super.create(ctx);
 

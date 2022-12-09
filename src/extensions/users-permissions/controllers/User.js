@@ -6,15 +6,29 @@ const sanitizeUser = (user) =>
     model: strapi.query("user", "users-permissions").model,
   });
 
-const formatError = (error) => [
-  { messages: [{ id: error.id, message: error.message, field: error.field }] },
-];
-
 module.exports = {
+  async create(ctx) {
+    const response = await super.create(ctx);
+
+    console.log("response-create-->", response);
+
+    // const updatedAccount = await strapi.entityService.update(
+    //   "api::account.account",
+    //   accountId,
+    //   {
+    //     data: {
+    //       balance: 10,
+    //     },
+    //   }
+    // );
+
+    return {
+      ...response,
+      balance: updatedAccount?.balance,
+    };
+  },
   async me(ctx) {
     const user = ctx.state.user;
-
-    console.log("-------->>>>>>", user);
 
     if (!user) {
       return ctx.badRequest(null, [
@@ -44,8 +58,6 @@ module.exports = {
    */
   async find(ctx, next, { populate } = {}) {
     let users;
-
-    console.log("-------->>>>>>", user);
 
     ctx.set(
       "Content-Range",

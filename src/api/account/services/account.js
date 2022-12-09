@@ -21,7 +21,7 @@ module.exports = createCoreService("api::account.account", ({ strapi }) => ({
   newUser(user_id) {
     return strapi
       .service("api::account.account")
-      .create({ data: { balance: 0, user: user_id } });
+      .create({ data: { balance: 20, user: user_id } });
   },
 
   getUserAccount(user_id) {
